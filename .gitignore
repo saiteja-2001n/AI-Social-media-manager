@@ -1,0 +1,48 @@
+
+## `.gitignore`
+
+```gitignore
+# Virtual Environment
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment Variables
+.env
+
+# Streamlit
+.streamlit/
+
+# VS Code
+.vscode/
+
+# Mac Files
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary Files
+temp/
+tmp/
+
+# Data Files
+*.sqlite3
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build Files
+build/
+dist/
+
+# Secrets
+secrets.toml
+
+# JSON generated data
+data.json

@@ -1,0 +1,335 @@
+{
+  "name": "Social Media Manager - Generate & Schedule",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-post",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook - Generate Post",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        0,
+        128
+      ],
+      "id": "ddf4eb4f-882a-45df-a572-96e1e7f3a716",
+      "typeVersion": 2.1,
+      "webhookId": "a4d2568c-e00d-46c9-9577-50d2802c788f"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "schedule-post",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook - Schedule Post",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        0,
+        560
+      ],
+      "id": "f3c92ce9-6979-41fe-947a-fb0d8edd0915",
+      "typeVersion": 2.1,
+      "webhookId": "76e1aa99-f788-4653-8d8b-453e55e8fe51"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"generated\",\n  \"content\": \"{{ $json.output }}\",\n  \"platform\": \"{{ $('Webhook - Generate Post').item.json.body.platform }}\"\n}",
+        "options": {}
+      },
+      "name": "Respond - Generated",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        576,
+        128
+      ],
+      "id": "90d7449e-dc6c-438b-b4fd-c1bb41b7d402",
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"scheduled\",\n  \"post_id\": \"{{ $now.toMillis() }}\",\n  \"platform\": \"{{ $('Webhook - Schedule Post').item.json.body.platform }}\",\n  \"schedule_time\": \"{{ $('Webhook - Schedule Post').item.json.body.schedule_time }}\",\n  \"ai_confirmation\": \"{{ $('AI Agent1').item.json.output }}\"\n}",
+        "options": {}
+      },
+      "name": "Respond - Scheduled",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        576,
+        560
+      ],
+      "id": "30234827-9d7e-44e0-9f55-7573e9ae4f74",
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get-analytics",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook - Analytics",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        0,
+        992
+      ],
+      "id": "016792be-b464-4b48-a3f5-ce45989d4f08",
+      "typeVersion": 2.1,
+      "webhookId": "51b3c56e-bcf7-4974-91ea-93135b671c10"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"platform\": \"{{ $('Webhook - Analytics').item.json.body.platform }}\",\n  \"impressions\": 4821,\n  \"likes\": 312,\n  \"comments\": 47,\n  \"shares\": 98,\n  \"engagement_rate\": \"3.2%\",\n  \"ai_insights\": \"{{ $('AI Agent2').item.json.output }}\"\n}",
+        "options": {}
+      },
+      "id": "9354e402-7cdf-43d7-af0b-4a6787eb80d5",
+      "name": "Respond - Analytics",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        576,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "You are a social media content creator. Generate engaging posts tailored to the specified platform and tone."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        16
+      ],
+      "id": "14ab38e5-e8f7-49ac-86de-4bc2f922c332",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Validate and optimize the scheduling time for this {{ $json.body.platform }} post. Schedule time: {{ $json.body.schedule_time }}. Provide a brief confirmation message.",
+        "options": {
+          "systemMessage": "You are a scheduling assistant. Validate post scheduling requests and provide confirmation."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        448
+      ],
+      "id": "2769da21-0ef8-40a1-87cc-11396b769992",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze these social media metrics for {{ $json.body.platform }}: Impressions: 4821, Likes: 312, Comments: 47, Shares: 98, Engagement Rate: 3.2%. Provide insights and recommendations.",
+        "options": {
+          "systemMessage": "You are a social media analytics expert. Analyze metrics and provide actionable insights."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        992
+      ],
+      "id": "60956a7e-016e-495b-b1af-57f063f1bc02",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 500,
+          "temperature": 0.7
+        }
+      },
+      "id": "c19fa0ca-4ff8-420b-9f6d-1e31f6d74eab",
+      "name": "Groq Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        240
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "E8rJ3idQguQ0bHvm",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 300,
+          "temperature": 0.5
+        }
+      },
+      "id": "b2293918-326e-4a3e-806c-31e6dc1f32d8",
+      "name": "Groq Schedule Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        672
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "E8rJ3idQguQ0bHvm",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 400,
+          "temperature": 0.3
+        }
+      },
+      "id": "76e8e72b-d0fa-466a-92c4-cffd6583c0ec",
+      "name": "Groq Analytics Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        1216
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "E8rJ3idQguQ0bHvm",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Generate Post": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Schedule Post": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Analytics": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond - Generated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond - Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Respond - Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Schedule Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Analytics Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "903f8a85-bcbd-402c-93c0-e4c21f373f4e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7ea8a0d340d7fb7cef8b5cd6bf04bcff08f0628801428208b19dec7d751c3c6"
+  },
+  "id": "X8g6Cvi1dKKnDJv5",
+  "tags": []
+}
