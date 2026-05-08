@@ -22,6 +22,12 @@ This project automates social media content generation, scheduling, and analytic
 
 ---
 
+## Live Demo
+
+Experience the assistant live on Streamlit Community Cloud:
+**[AI Social Media Manager](https://ai-social-media-manager-cgpycew8vskpvp2qmsv75m.streamlit.app/)**
+
+
 # Tech Stack
 
 ## Frontend
@@ -58,7 +64,3 @@ User → Streamlit UI → AI Agent → Tools Layer → n8n Workflow → Groq LLM
 ├── requirements.txt
 ├── .gitignore
 └── README.md
-
-
-# Live App :
- *(https://ai-social-media-manager-cgpycew8vskpvp2qmsv75m.streamlit.app/)*
