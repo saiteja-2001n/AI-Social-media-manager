@@ -171,10 +171,81 @@ def safe_agent_run(
         )
 
         if not result.get("response"):
+            result["response"] = "⚠️ No response generated."
 
-            result["response"] = (
-                "⚠️ No response generated."
-            )
+        # n8n now returns the generated caption and Qwen image URL.
+        # Extract those fields while keeping the existing agent structure.
+        n8n_data = {}
+
+        # Check tool_results for the raw n8n response.
+        tool_results = result.get("tool_results") or []
+
+        if isinstance(tool_results, list):
+            for tool_result in reversed(tool_results):
+                candidate = tool_result
+
+                if isinstance(candidate, str):
+                    try:
+                        candidate = json.loads(candidate)
+                    except Exception:
+                        continue
+
+                if isinstance(candidate, dict):
+                    # Handle common wrappers used by agent/tool responses.
+                    for key in ("result", "response", "data", "output"):
+                        nested = candidate.get(key)
+
+                        if isinstance(nested, str):
+                            try:
+                                nested = json.loads(nested)
+                            except Exception:
+                                pass
+
+                        if isinstance(nested, dict):
+                            candidate = nested
+                            break
+
+                    if any(
+                        key in candidate
+                        for key in (
+                            "content",
+                            "image_data",
+                            "image_prompt",
+                            "image"
+                        )
+                    ):
+                        n8n_data = candidate
+                        break
+
+        # Also check whether agent.run put the n8n JSON directly in response.
+        if not n8n_data:
+            response_value = result.get("response")
+
+            if isinstance(response_value, dict):
+                n8n_data = response_value
+
+            elif isinstance(response_value, str):
+                try:
+                    parsed = json.loads(response_value)
+                    if isinstance(parsed, dict):
+                        n8n_data = parsed
+                except Exception:
+                    pass
+
+        # Put the n8n fields into the result keys already used by this app.
+        if isinstance(n8n_data, dict):
+
+            if n8n_data.get("content"):
+                result["response"] = str(n8n_data["content"])
+
+            if n8n_data.get("image_data"):
+                result["image_data"] = n8n_data["image_data"]
+
+            if n8n_data.get("image_prompt"):
+                result["image_prompt"] = n8n_data["image_prompt"]
+
+            if n8n_data.get("platform"):
+                result["platform"] = n8n_data["platform"]
 
         return result
 
@@ -206,7 +277,7 @@ with st.sidebar:
 
     n8n_base = st.text_input(
         "n8n Base URL",
-        value="https://saitejagoud.app.n8n.cloud"
+        value="https://shankergoud.app.n8n.cloud"
     )
 
 
@@ -250,7 +321,7 @@ if page == "✍️ Generate Content":
 
         if topic:
 
-            with st.spinner("Generating content..."):
+            with st.spinner("Generating caption and image..."):
 
                 prompt = (
                     f"Generate ONLY plain text content "
@@ -288,6 +359,8 @@ if page == "✍️ Generate Content":
                 "content": clean_content,
                 "topic": topic,
                 "tone": tone,
+                "image_data": result.get("image_data"),
+                "image_prompt": result.get("image_prompt"),
                 "status": "Draft",
             })
 
@@ -297,6 +370,8 @@ if page == "✍️ Generate Content":
                 "content": clean_content,
                 "topic": topic,
                 "tone": tone,
+                "image_data": result.get("image_data"),
+                "image_prompt": result.get("image_prompt"),
             }
 
             save_data()
@@ -311,6 +386,11 @@ if page == "✍️ Generate Content":
         post = st.session_state.last_generated
 
         st.success("✅ Post generated and saved as draft!")
+
+        # ── Generated Image ─────────────────────────────────────────────
+        if post.get("image_data"):
+            st.markdown("### 🖼️ Generated Image")
+            st.image(post["image_data"], use_container_width=True)
 
         st.markdown(
             f"""
@@ -368,6 +448,9 @@ elif page == "📅 Scheduled Posts":
                 post["content"]
             ).replace("\n", "<br>")
 
+            if post.get("image_data"):
+                st.image(post["image_data"], width=500)
+
             st.markdown(
                 f"""
                 <div class="card">
@@ -406,6 +489,7 @@ elif page == "📅 Scheduled Posts":
                             content=post["content"],
                             platform=post["platform"],
                             schedule_time=sched_time or "now",
+                            image_data=post.get("image_data", ""),
                             n8n_base_url=n8n_base,
                         )
 

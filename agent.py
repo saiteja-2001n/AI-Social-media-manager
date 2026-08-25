@@ -7,12 +7,12 @@ from tools import SocialMediaTools
 class SocialMediaAgent:
     def __init__(self):
         self.tools = SocialMediaTools()
-        self.n8n_base_url = "https://saitejagoud.app.n8n.cloud"
+        self.n8n_base_url = "https://shankergoud.app.n8n.cloud"
 
     def run(
         self,
         user_message: str,
-        n8n_base_url: str = "https://saitejagoud.app.n8n.cloud",
+        n8n_base_url: str = "https://shankergoud.app.n8n.cloud",
         platform: str = "LinkedIn",
         tone: str = "professional",
         include_hashtags: bool = True,
@@ -48,6 +48,23 @@ class SocialMediaAgent:
                 final_text = str(result)
             else:
                 final_text = "⚠️ Could not generate post. Please check n8n is active."
+
+            # Generate a matching image after the caption is created.
+            image_result = self.tools.generate_image(
+                topic=user_message,
+                caption=final_text,
+                platform=platform,
+                n8n_base_url=n8n_base_url,
+            )
+
+            tool_results_log.append({
+                "tool": "generate_image",
+                "input": user_message,
+                "result": image_result,
+            })
+
+            image_data = image_result.get("image_data") if image_result else None
+            image_prompt = image_result.get("image_prompt") if image_result else None
 
         # ✅ Schedule post via n8n
         elif "schedule" in user_message.lower():
@@ -107,6 +124,8 @@ class SocialMediaAgent:
 
         return {
             "response": final_text,
+            "image_data": image_data if "image_data" in locals() else None,
+            "image_prompt": image_prompt if "image_prompt" in locals() else None,
             "tool_results": tool_results_log,
             "generated_posts": generated_posts,
             "scheduled_posts": scheduled_posts,
@@ -127,6 +146,7 @@ class SocialMediaAgent:
                 content=tool_input.get("content", ""),
                 platform=tool_input.get("platform", ""),
                 schedule_time=tool_input.get("schedule_time", "now"),
+                image_data=tool_input.get("image_data", ""),
                 n8n_base_url=n8n_base_url,
             )
             return {"success": success}
