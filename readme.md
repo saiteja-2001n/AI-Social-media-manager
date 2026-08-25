@@ -49,7 +49,7 @@ The application uses AI to reduce the time required to create social media conte
 ## Live Demo
 
 Experience the assistant live on Streamlit Community Cloud:
-**[AI Social Media Manager](https://ai-social-media-manager-cgpycew8vskpvp2qmsv75m.streamlit.app/)**
+**[AI Social Media Manager](https://ai-social-media-manager-fbspemfozddfmdexj2lguz.streamlit.app/)**
 
 
 
