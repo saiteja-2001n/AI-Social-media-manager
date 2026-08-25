@@ -4,6 +4,12 @@ An AI-powered social media management platform that helps users create, manage, 
 
 The application combines AI-powered content generation with social media management features to simplify the process of creating and publishing content across multiple platforms.
 
+## Live Demo
+
+Experience the assistant live on Streamlit Community Cloud:
+**[AI Social Media Manager](https://ai-social-media-manager-fbspemfozddfmdexj2lguz.streamlit.app/)**
+
+
 ## Features
 
 ### AI Content Generation
@@ -45,13 +51,6 @@ The application uses AI to reduce the time required to create social media conte
 * Post variations
 * Platform-specific content
 * Content improvement
-
-## Live Demo
-
-Experience the assistant live on Streamlit Community Cloud:
-**[AI Social Media Manager](https://ai-social-media-manager-fbspemfozddfmdexj2lguz.streamlit.app/)**
-
-
 
 ## Tech Stack
 
