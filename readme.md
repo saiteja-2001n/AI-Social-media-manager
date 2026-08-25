@@ -62,7 +62,7 @@ Experience the assistant live on Streamlit Community Cloud:
 - Python
 
 ## AI / LLM
-- Groq LLM (`llama-3.1-8b-instant`)
+- Open AI LLM (model: "gpt-4.1")
 
 ## Automation
 - n8n
